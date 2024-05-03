@@ -1,7 +1,7 @@
 /*
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
-      TUGAS AKHIR V1.1
+      TUGAS AKHIR V1.2
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
 
@@ -24,12 +24,10 @@
  * led[1] <MERAH> = 12 ->indikator lock
  * led[2] <BIRU>  = 13 ->indikator kalibrasi
  */
- 
+#include <HX711_ADC.h>
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <HCSR04.h>
-//#include "HX711.h"
-#include <HX711_ADC.h>
 #include <OneButton.h>
 #include <Encoder.h>
 #include <EEPROM.h>
@@ -38,7 +36,7 @@
 #define encoderDTpin 3    //STATIC
 #define encoderCLKpin 4   //STATIC
 //--------load cell----------//
-#define loadCelDTpin 9    //STATIC
+#define loadCelDTpin   9    //STATIC
 #define loadCellSCKpin 10 //STATIC
 //--------ultrasonik---------//
 #define triggerPin1 5      //STATIC
@@ -95,6 +93,7 @@ int currentLength;
 int units   = -1;
 int weightToInt;
 int conCal =0;
+int coT=0;
 float unitSetting = -1;
 float ounces;
 float parWeight=50;
@@ -106,7 +105,7 @@ float referenceLength = 0.0; // Panjang referensi dalam cm
 float referenceWidth  = 0.0;  // Lebar referensi dalam cm
 float referenceHeight = 0.0; // Tinggi referensi dalam cm
 
-float calibration_factor = -9; //NILAI KALIBRASI DEFAULT
+float calibration_factor = 696.0; //NILAI KALIBRASI DEFAULT
 
 String menu1[]={"5","kalibrasi Beban","Kalibrasi Dimensi","Set Timer Lock","Set Timer Sleep","Back"};
 String menuJarak[]={"5","Sensor 1","Sensor 2","Sensor 3","auto","Back"};
@@ -202,7 +201,7 @@ byte pointer[] = {
   B00000,
   B00000
 };
- int coT=0;
+ 
 void setup() {
   Serial.begin(9600); // Inisialisasi komunikasi serial
   scale.begin(); 
@@ -221,26 +220,11 @@ void setup() {
   lcd.createChar(6, speaker);
   lcd.createChar(7, pointer);
 
-  EEPROM.get(0,calibration_factor);
-  EEPROM.get(10,valueLength);
-  EEPROM.get(20,valueWidth);
-  EEPROM.get(30,valueHeight);
-  EEPROM.get(40,timerLock);
-  EEPROM.get(50,timerSleep);
-  EEPROM.get(60,errorLength);
-  EEPROM.get(70,errorWidth);
-  EEPROM.get(80,errorHeight);
-
-  referenceLength= valueLength;
-  referenceWidth = valueWidth;
-  referenceHeight= valueHeight;
-  
-  
-
   unsigned long stabilizingtime = 2000; // preciscion right after power-up can be improved by adding a few seconds of stabilizing time
   boolean _tare = true; //set this to false if you don't want tare to be performed in the next step
   scale.start(stabilizingtime, _tare);
-  if (scale.getTareTimeoutFlag()) {
+  
+  if (scale.getTareTimeoutFlag()|| scale.getSignalTimeoutFlag()) {
     Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
     lcd.setCursor(0,1);
     lcd.print("ERROR in LOAD CELL!!");
@@ -258,8 +242,22 @@ void setup() {
       updateProgressBar(i, 100, 1);
       delay(50);
     }
+    EEPROM.get(0,calibration_factor);
+    EEPROM.get(20,valueLength);
+    EEPROM.get(30,valueWidth);
+    EEPROM.get(40,valueHeight);
+    EEPROM.get(50,timerLock);
+    EEPROM.get(60,timerSleep);
+    EEPROM.get(70,errorLength);
+    EEPROM.get(80,errorWidth);
+    EEPROM.get(90,errorHeight);
   }
   
+  referenceLength= valueLength;
+  referenceWidth = valueWidth;
+  referenceHeight= valueHeight;
+
+
   Serial.println(String()+"referenceLength:"+referenceLength);
   Serial.println(String()+"referenceWidth :"+referenceWidth);
   Serial.println(String()+"referenceHeight:"+referenceHeight);
@@ -272,10 +270,7 @@ void setup() {
   // Serial.println(String() + "runObject:" + runObject);
   // Serial.println(String() + "timeRead :" + timeRead);
   // Serial.println(String() + "stateRun :" + stateRun);
-  //buzzerRun(1);
   lcd.clear();
-  //delay(1000);
-  //buzzerRun(0);
 }
 
 void loop() {
@@ -310,7 +305,7 @@ void singleClick(){
  
   Serial.println("button 1 klik run");
   
- if(currentLayer == 0 && subLayer == 0 ){ 
+  if(currentLayer == 0 && subLayer == 0 ){ 
     
     lcd.clear();
     hasilP  = 0; 
@@ -379,6 +374,7 @@ void singleClick(){
  }
  
  else if(currentLayer != 1 && subLayer == 1){
+  
   clearMenu();
   lcd.setCursor(1,1);
   lcd.print("KALIBRASI SELESAI");
@@ -387,10 +383,12 @@ void singleClick(){
   currentSelect = 1;
   cursorSelect();
   conCal = 0;
+  for(int i =0; i < 2;i++){ buzzerRun(1); delay(50); buzzerRun(0); delay(50);}
   scale.refreshDataSet();
   calibration_factor = scale.getNewCalibration(parWeight); //get the new calibration value
   EEPROM.put(0,calibration_factor);
-  Serial.println("KALIBRASI SELESAI");
+  Serial.println("calibration_factor1:" + String(calibration_factor));
+  Serial.println("parWeight:" + String(parWeight));
   clearMenu();
  }
 
@@ -400,7 +398,7 @@ void singleClick(){
    currentLayer = 1;
    currentSelect = 3;
    cursorSelect();
-   EEPROM.put(40,timerLock);
+   EEPROM.put(50,timerLock);
  }
 
  else if(currentLayer != 1 && subLayer == 4 ){
@@ -409,7 +407,7 @@ void singleClick(){
    currentLayer = 1;
    currentSelect = 4;
    cursorSelect();
-   EEPROM.put(50,timerSleep);
+   EEPROM.put(60,timerSleep);
  }
 
 
@@ -478,8 +476,8 @@ void singleClick(){
       cursorSelect();
       clearMenu();
       referenceLength = valueLength;
-      EEPROM.put(10,valueLength);
-      EEPROM.put(60,errorLength);
+      EEPROM.put(20,valueLength);
+      EEPROM.put(70,errorLength);
     break;
   };
  }
@@ -500,8 +498,8 @@ void singleClick(){
       cursorSelect();
       clearMenu();
       referenceWidth  = valueWidth;
-      EEPROM.put(20,valueWidth);
-      EEPROM.put(70,errorWidth);
+      EEPROM.put(30,valueWidth);
+      EEPROM.put(80,errorWidth);
     break;
   };
  }
@@ -522,8 +520,8 @@ void singleClick(){
       cursorSelect();
       clearMenu();
       referenceHeight = valueHeight;
-      EEPROM.put(30,valueHeight);
-      EEPROM.put(80,errorHeight);
+      EEPROM.put(40,valueHeight);
+      EEPROM.put(90,errorHeight);
     break;
   };
  }
@@ -812,68 +810,68 @@ void showSetting(){
 
   if(subLayer==1){
      static int conLevel=0;
-     scale.update();
+     
     if(conCal==1){
       //unsigned long tmr = millis();
       static unsigned long save = 0;
-      
+      scale.update();
       
       if(millis() - save > 500){
         save = millis();
-        if(conLevel==10){scale.tareNoDelay();   }
+        if(conLevel==8){ scale.tareNoDelay(); }
         lcd.setCursor(0,1);
         lcd.print("KOSONGKAN TIMBANGAN!");
         conLevel++;
-        if (scale.getTareStatus() == true && conLevel >= 10) {
-        conLevel = 0;
-        conCal = 2;
-        save = 0;
-        lcd.clear();
+        if (scale.getTareStatus() == true && conLevel >= 8) {
+          conLevel = 0;
+          conCal = 2;
+          save = 0;
+          lcd.clear();
+          buzzerRun(1);
+          delay(100);
+          buzzerRun(0);
+        }
       }
-      }
-      
       
       Serial.println(String() + "conLevel:" + conLevel);
     }
 
     else if(conCal==2){
-      
-      //scale.update();
+      scale.update();
       lcd.setCursor(3,0);
       lcd.print("TARUH BEBAN!!!");
       lcd.setCursor(0,2);
       lcd.print("Parameter : ");
       lcd.print(int(parWeight));
       lcd.print(" Gram");
-      
     }
     
   }
    
-  /*if(subLayer==1){
-    // scale.set_scale(calibration_factor);
-    // getWeightSet();
-    if (scale.getTareStatus() == true) {
-      Serial.println("Tare complete");
-      _resume = true;
-    }
-    weightToInt = unitSetting;
+  // /*if(subLayer==1){
+  //   // scale.set_scale(calibration_factor);
+  //   // getWeightSet();
+  //   if (scale.getTareStatus() == true) {
+  //     Serial.println("Tare complete");
+  //     _resume = true;
+  //   }
+  //   weightToInt = unitSetting;
 
-    lcd.setCursor(0,0);
-    lcd.print("BERAT:");
-    lcd.setCursor(6,1);
-    if(unitSetting >= 1000){  lcd.print( unitSetting/1000); } else{ lcd.print(weightToInt); }
+  //   lcd.setCursor(0,0);
+  //   lcd.print("BERAT:");
+  //   lcd.setCursor(6,1);
+  //   if(unitSetting >= 1000){  lcd.print( unitSetting/1000); } else{ lcd.print(weightToInt); }
 
-    if(weightToInt < 10)       { clearChar(7,1); clearChar(8,1);  clearChar(9,1);}
-    else if(weightToInt < 100) { clearChar(8,1); clearChar(9,1);}
-    else if(weightToInt < 1000){ clearChar(9,1); }
+  //   if(weightToInt < 10)       { clearChar(7,1); clearChar(8,1);  clearChar(9,1);}
+  //   else if(weightToInt < 100) { clearChar(8,1); clearChar(9,1);}
+  //   else if(weightToInt < 1000){ clearChar(9,1); }
 
-    lcd.setCursor(10,1);
-    lcd.print((unitSetting >= 1000)?textWeight[1]:textWeight[0]);
-    lcd.setCursor(0,3);
-    lcd.print("Parameter : ");
-    lcd.print(parWeight);
-  }*/
+  //   lcd.setCursor(10,1);
+  //   lcd.print((unitSetting >= 1000)?textWeight[1]:textWeight[0]);
+  //   lcd.setCursor(0,3);
+  //   lcd.print("Parameter : ");
+  //   lcd.print(parWeight);
+  // }
 
   if(subLayer==2){
     lcd.setCursor(18,cursorLayer ); 
@@ -933,25 +931,25 @@ void showSetting(){
   if(subLayer==5){
     for(int i = 0; i < 10; i++){
       referenceLength = hc1.dist() + 1; buzzerRun(1); 
-      delay(50);
+      delay(60);
     }
     for(int i = 0; i < 10; i++){
       referenceWidth  = hc2.dist() + 1; buzzerRun(1);
-      delay(50);
+      delay(60);
     }
 
     for(int i = 0; i < 10; i++){
       referenceHeight  = hc3.dist() + 1; buzzerRun(1);
-      delay(50);
+      delay(60);
     }
     
     valueLength = referenceLength;
     valueWidth  = referenceWidth;
     valueHeight = referenceHeight;
     
-    EEPROM.put(10,valueLength);
-    EEPROM.put(20,valueWidth);
-    EEPROM.put(30,valueHeight);
+    EEPROM.put(20,valueLength);
+    EEPROM.put(30,valueWidth);
+    EEPROM.put(40,valueHeight);
 
     lcd.setCursor(1,0);
     lcd.print("KALIBRASI SELESAI");
@@ -984,8 +982,6 @@ void showSetting(){
     lcd.setCursor(18,cursorLayer ); 
     lcd.write(byte(7));
     for(int i=0;i<currentLength;i++){lcd.setCursor(0,i); lcd.print(menuSensor1[i+1]);}
-    if(valueLength<10){ lcd.setCursor(13,0); lcd.print(" "); }
-    if(errorLength >= 0.0 && errorLength<10){ lcd.setCursor(13,1); lcd.print(" "); }
     lcd.setCursor(10,0);
     lcd.print(valueLength,1); 
     lcd.setCursor(15,0);
@@ -994,14 +990,19 @@ void showSetting(){
     lcd.print(errorLength,1); 
     lcd.setCursor(15,1);
     lcd.print("CM");
-    if(flagS){lcd.setCursor(9,cursorLayer); lcd.print("*");}
+    if(flagS){
+      lcd.setCursor(9,cursorLayer); 
+      lcd.print("*");
+      if(valueLength<10){ lcd.setCursor(13,0); lcd.print(" "); }
+      if(errorLength >= 0.0 && errorLength<10){ lcd.setCursor(13,1); lcd.print(" "); }
+      if(errorLength>-10.0){ lcd.setCursor(14,1); lcd.print(" "); }
+    }
   }
   if(subLayer == 7){
     lcd.setCursor(18,cursorLayer ); 
     lcd.write(byte(7));
     for(int i=0;i<currentLength;i++){lcd.setCursor(0,i); lcd.print(menuSensor2[i+1]);}
-    if(valueWidth<10){ lcd.setCursor(13,0); lcd.print(" "); }
-    if(errorWidth >= 0.0 && errorWidth<10){ lcd.setCursor(13,1); lcd.print(" "); }
+    
     lcd.setCursor(10,0);
     lcd.print(valueWidth,1); 
     lcd.setCursor(15,0);
@@ -1010,14 +1011,19 @@ void showSetting(){
     lcd.print(errorWidth,1); 
     lcd.setCursor(15,1);
     lcd.print("CM");
-    if(flagS){lcd.setCursor(9,cursorLayer); lcd.print("*");}
+    if(flagS){
+      lcd.setCursor(9,cursorLayer); 
+      lcd.print("*");
+      if(valueWidth<10){ lcd.setCursor(13,0); lcd.print(" "); }
+      if(errorWidth >= 0.0 && errorWidth<10){ lcd.setCursor(13,1); lcd.print(" "); }
+      if(errorWidth>-10.0){ lcd.setCursor(14,1); lcd.print(" "); }
+    }
   }
   if(subLayer == 8){
     lcd.setCursor(18,cursorLayer ); 
     lcd.write(byte(7));
     for(int i=0;i<currentLength;i++){lcd.setCursor(0,i); lcd.print(menuSensor3[i+1]);}
-    if(valueHeight<10){ lcd.setCursor(13,0); lcd.print(" "); }
-    if(errorHeight >= 0.0 && errorHeight<10){ lcd.setCursor(13,1); lcd.print(" "); }
+    
     lcd.setCursor(10,0);
     lcd.print(valueHeight,1);
     lcd.setCursor(15,0); 
@@ -1026,7 +1032,13 @@ void showSetting(){
     lcd.print(errorHeight,1); 
     lcd.setCursor(15,1);
     lcd.print("CM");
-    if(flagS){lcd.setCursor(9,cursorLayer); lcd.print("*");}
+    if(flagS){
+      lcd.setCursor(9,cursorLayer); 
+      lcd.print("*");
+      if(valueHeight<10){ lcd.setCursor(13,0); lcd.print(" "); }
+      if(errorHeight >= 0.0 && errorHeight<10){ lcd.setCursor(13,1); lcd.print(" "); }
+      if(errorHeight>-10.0){ lcd.setCursor(14,1); lcd.print(" "); }
+    }
   }
 }
 
@@ -1182,20 +1194,20 @@ float getWeight(){
   }
 }
 
-//---------MENGAMBIL VALUE DARI SENSOR LOADCELL UNTUK KALIBRASI LOADCELL-------------//
-/*void getWeightSet(){
-  unsigned long tmr2 = millis();
-  static unsigned long saveTmr2;
+// //---------MENGAMBIL VALUE DARI SENSOR LOADCELL UNTUK KALIBRASI LOADCELL-------------//
+// /*void getWeightSet(){
+//   unsigned long tmr2 = millis();
+//   static unsigned long saveTmr2;
 
-  if(tmr2 - saveTmr2 > 500){
-    //scale.power_up();
-    saveTmr2 = tmr2;
-    unitSetting = scale.get_units(),0;
+//   if(tmr2 - saveTmr2 > 500){
+//     //scale.power_up();
+//     saveTmr2 = tmr2;
+//     unitSetting = scale.get_units(),0;
     
-    if (unitSetting < 0 ){ unitSetting = 0; }
-    //return unitSetting;
-  }
-}*/
+//     if (unitSetting < 0 ){ unitSetting = 0; }
+//     //return unitSetting;
+//   }
+// }
 
 //-----------MENGHITUNG WAKTU MUNDUR SLEEP LCD----------//
 void timerLCD(){
@@ -1211,7 +1223,6 @@ void timerLCD(){
     if((tmr - saveTmrH) > 1000 && state1==0 ){ saveTmrH = tmr; coT++;  }
     lcd.setCursor(18,0);
     lcd.print(coT);
-   //// Serial.println(String()+"co:" + co);
   }
  
   if(coT >= timerSleep && stateRun == 1 && Run == 1){
