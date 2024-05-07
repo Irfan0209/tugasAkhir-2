@@ -257,20 +257,8 @@ void setup() {
   referenceWidth = valueWidth;
   referenceHeight= valueHeight;
 
-
-  Serial.println(String()+"referenceLength:"+referenceLength);
-  Serial.println(String()+"referenceWidth :"+referenceWidth);
-  Serial.println(String()+"referenceHeight:"+referenceHeight);
-  Serial.println(String()+"calibration_factor:"+calibration_factor);
-  Serial.println(String()+"errorLength :"+errorLength);
-  Serial.println(String()+"errorWidth  :"+errorWidth);
-  Serial.println(String()+"errorHeight :"+errorHeight);
-  Serial.println(String()+"timerSleep  :"+timerSleep);
-  Serial.println(String() +"timerLock  :" + timerLock);
-  // Serial.println(String() + "runObject:" + runObject);
-  // Serial.println(String() + "timeRead :" + timeRead);
-  // Serial.println(String() + "stateRun :" + stateRun);
   lcd.clear();
+
 }
 
 void loop() {
@@ -280,6 +268,7 @@ void loop() {
     kalkulasi();
     showSetting();
     showLed();
+    //showMonitor();
 }
 
 //----------------TAMPILAN INDIKATOR LED---------------//
@@ -415,7 +404,6 @@ void singleClick(){
     
  switch(currentSelect){
     case 1 :
-      //flagS=!flagS;
       clearMenu();
       subLayer = 6;
       currentSelect = 1;
@@ -424,7 +412,6 @@ void singleClick(){
     break;
 
     case 2 :
-      //flagS=!flagS;
       clearMenu();
       subLayer = 7;
       currentSelect = 1;
@@ -433,7 +420,6 @@ void singleClick(){
     break;
 
     case 3 :
-     //flagS=!flagS;
      clearMenu();
      subLayer = 8;
      currentSelect = 1;
@@ -444,18 +430,15 @@ void singleClick(){
     case 4 :
      clearMenu();
      subLayer = 5;
-     //currentSelect = 1;
-
     break;
 
-   case 5 :
+    case 5 :
       clearMenu();
       subLayer = 0;
       currentLayer = 1;
       currentSelect = 2;
       flagS = 0;
       cursorSelect();
-
     break;
   };
  }
@@ -812,7 +795,6 @@ void showSetting(){
      static int conLevel=0;
      
     if(conCal==1){
-      //unsigned long tmr = millis();
       static unsigned long save = 0;
       scale.update();
       
@@ -848,31 +830,6 @@ void showSetting(){
     
   }
    
-  // /*if(subLayer==1){
-  //   // scale.set_scale(calibration_factor);
-  //   // getWeightSet();
-  //   if (scale.getTareStatus() == true) {
-  //     Serial.println("Tare complete");
-  //     _resume = true;
-  //   }
-  //   weightToInt = unitSetting;
-
-  //   lcd.setCursor(0,0);
-  //   lcd.print("BERAT:");
-  //   lcd.setCursor(6,1);
-  //   if(unitSetting >= 1000){  lcd.print( unitSetting/1000); } else{ lcd.print(weightToInt); }
-
-  //   if(weightToInt < 10)       { clearChar(7,1); clearChar(8,1);  clearChar(9,1);}
-  //   else if(weightToInt < 100) { clearChar(8,1); clearChar(9,1);}
-  //   else if(weightToInt < 1000){ clearChar(9,1); }
-
-  //   lcd.setCursor(10,1);
-  //   lcd.print((unitSetting >= 1000)?textWeight[1]:textWeight[0]);
-  //   lcd.setCursor(0,3);
-  //   lcd.print("Parameter : ");
-  //   lcd.print(parWeight);
-  // }
-
   if(subLayer==2){
     lcd.setCursor(18,cursorLayer ); 
     lcd.write(byte(7));
@@ -881,16 +838,7 @@ void showSetting(){
       for(int i=0;i<4;i++){
         lcd.setCursor(0,i);
         lcd.print(menuJarak[i+1]);
-        //lcd.setCursor(15,(i==3)?2:i);
-        // lcd.print("CM");
-        // lcd.setCursor(10,0);
-        // lcd.print(valueLength,1); 
-        // lcd.setCursor(10,1);
-        // lcd.print(valueWidth,1); 
-        // lcd.setCursor(10,2);
-        // lcd.print(valueHeight,1); 
-        // if(flagS){lcd.setCursor(9,cursorLayer); lcd.print("*");}
-
+        
         for(int i=0;i<2;i++){
           lcd.setCursor(19,i);
           lcd.print("|");
@@ -1092,8 +1040,6 @@ void kalkulasi(){
     if(hasilL < 0){ hasilL = 0.0; }
     if(hasilT < 0){ hasilT = 0.0; }
 
-    showMonitor();
-
   }else{ 
     saveTmr3 = millis(); 
     co=0; 
@@ -1132,35 +1078,35 @@ void kalkulasi(){
 
 //----------------DEBUGGING PROGRAM KE SERIAL MONITOR--------------------//
 void showMonitor(){
-  // Serial.print("Panjang: ");
-  // Serial.print(length);
-  // Serial.println(" cm");
+  Serial.print("Panjang: ");
+  Serial.print(length);
+  Serial.println(" cm");
 
-  // Serial.print("panjang+errorLength: ");
-  // Serial.print(length+errorLength);
+  Serial.print("panjang+errorLength: ");
+  Serial.print(length+errorLength);
   
  
-  // Serial.print("Lebar: ");
-  // Serial.print(width);
-  // Serial.println(" cm");
+  Serial.print("Lebar: ");
+  Serial.print(width);
+  Serial.println(" cm");
  
-  // Serial.print("Tinggi: ");
-  // Serial.print(height);
-  // Serial.println(" cm");
+  Serial.print("Tinggi: ");
+  Serial.print(height);
+  Serial.println(" cm");
  
-  // Serial.print("Berat: ");
-  // Serial.print((weight >= 1000)? weight / 1000 : weight);
-  // Serial.println(" KG");
+  Serial.print("Berat: ");
+  Serial.print((weight >= 1000)? weight / 1000 : weight);
+  Serial.println(" KG");
   
-  // Serial.print("Berat: ");
-  // Serial.print(weight);
-  // Serial.println(" gram");
+  Serial.print("Berat: ");
+  Serial.print(weight);
+  Serial.println(" gram");
 
-  // Serial.print("trigger: ");
-  // Serial.println(trigger);
+  Serial.print("trigger: ");
+  Serial.println(trigger);
 
-  // Serial.print("runObject: ");
-  // Serial.println(runObject);
+  Serial.print("runObject: ");
+  Serial.println(runObject);
   
 }
 
@@ -1193,21 +1139,6 @@ float getWeight(){
     }
   }
 }
-
-// //---------MENGAMBIL VALUE DARI SENSOR LOADCELL UNTUK KALIBRASI LOADCELL-------------//
-// /*void getWeightSet(){
-//   unsigned long tmr2 = millis();
-//   static unsigned long saveTmr2;
-
-//   if(tmr2 - saveTmr2 > 500){
-//     //scale.power_up();
-//     saveTmr2 = tmr2;
-//     unitSetting = scale.get_units(),0;
-    
-//     if (unitSetting < 0 ){ unitSetting = 0; }
-//     //return unitSetting;
-//   }
-// }
 
 //-----------MENGHITUNG WAKTU MUNDUR SLEEP LCD----------//
 void timerLCD(){
