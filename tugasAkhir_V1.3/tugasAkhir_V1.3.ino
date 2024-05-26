@@ -1,7 +1,7 @@
 /*
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
-      TUGAS AKHIR V1.2
+      TUGAS AKHIR V1.3
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
 
@@ -73,7 +73,8 @@ bool flagS=0;
 bool stateRun= 1;
 bool runObject = true;
 bool trigger   = false;
-bool state1 = 0;
+bool state1 = false;
+bool flagWeight = false;
 int  length,height,width;
 int  timerFlag;
 int  timeRead = 0;
@@ -272,6 +273,7 @@ void loop() {
 }
 
 //----------------TAMPILAN INDIKATOR LED---------------//
+/*
 void showLed(){
     if(state1 == 1 && runObject == 1 && currentLayer == 0){getIndikator(0,1,0);}
     else if(state1 == 0 && runObject == 1 && currentLayer == 0){getIndikator(0,0,1); getIndikator(1,0,0); getIndikator(2,0,0);}
@@ -287,7 +289,29 @@ void showLed(){
     else if(currentLayer != 1 && subLayer == 8 && flagS == 1){ getIndikator(2,1,0); }
     else if(currentLayer != 1 && subLayer == 3){ getIndikator(2,1,0); }
     else if(currentLayer != 1 && subLayer == 4){ getIndikator(2,1,0); }
+
 }
+*/
+
+void showLed(){
+    if(state1 == 1 && runObject == 1 && currentLayer == 0){getIndikator(0,1,0);}
+    else if(state1 == 0 && runObject == 1 && currentLayer == 0){getIndikator(0,0,1); getIndikator(1,0,0); getIndikator(2,0,0);}
+    //else if(state1 == 0 && runObject == 0 && currentLayer == 0){getIndikator(0,0,0); getIndikator(1,0,1); getIndikator(2,0,0);}
+    else if(currentLayer == 1 && subLayer == 0){getIndikator(0,0,0); getIndikator(1,0,0); getIndikator(2,0,1);} //masuk seting
+    else if(currentLayer == 0 && runObject == 1 && flagWeight == 1){getIndikator(0,0,0); getIndikator(1,0,1); getIndikator(2,0,0);}
+    else if(currentLayer != 1 && subLayer == 1){ getIndikator(2,1,0); }
+    else if(currentLayer != 1 && subLayer == 2){ getIndikator(2,0,1); }
+    else if(currentLayer != 1 && subLayer == 6 && flagS == 0){ getIndikator(2,0,1); }
+    else if(currentLayer != 1 && subLayer == 7 && flagS == 0){ getIndikator(2,0,1); }
+    else if(currentLayer != 1 && subLayer == 8 && flagS == 0){ getIndikator(2,0,1); }
+    else if(currentLayer != 1 && subLayer == 6 && flagS == 1){ getIndikator(2,1,0); }
+    else if(currentLayer != 1 && subLayer == 7 && flagS == 1){ getIndikator(2,1,0); }
+    else if(currentLayer != 1 && subLayer == 8 && flagS == 1){ getIndikator(2,1,0); }
+    else if(currentLayer != 1 && subLayer == 3){ getIndikator(2,1,0); }
+    else if(currentLayer != 1 && subLayer == 4){ getIndikator(2,1,0); }
+    
+}
+
 
 //-------------------PROGRAM BUTTON SINGLE CLICK------------------------//
 void singleClick(){
@@ -749,7 +773,7 @@ void showSetting(){
         lcd.print("!");
         lcd.setCursor(19,3);
         lcd.write(6);
-        if(runObject)buzzerRun(1); 
+        if(runObject)buzzerRun(1); flagWeight = 1;
       }
       else{
         lcd.setCursor(18,3);
@@ -757,6 +781,7 @@ void showSetting(){
         lcd.setCursor(19,3);
         lcd.print(" ");
         buzzerRun(0);
+        flagWeight = 0;
       }
     }
    else{ lcd.noBacklight(); clearMenu();}
