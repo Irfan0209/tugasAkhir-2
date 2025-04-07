@@ -204,7 +204,7 @@ byte pointer[] = {
 };
  
 void setup() {
-  Serial.begin(9600); // Inisialisasi komunikasi serial
+  Serial.begin(115200); // Inisialisasi komunikasi serial
   scale.begin(); 
   lcd.begin();
   lcd.backlight();
@@ -1091,6 +1091,7 @@ void kalkulasi(){
       stateRun = 0;
       clearChar(18,0);
       clearChar(19,0);
+      Serial.println("label=paket"+String(1) + "panjang="+String(hasilP) + "lebar="+String(hasilL) + "tinggi="+String(hasilT) + "berat="+String(weight));
     }
   
   }

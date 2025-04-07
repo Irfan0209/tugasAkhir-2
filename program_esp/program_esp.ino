@@ -1,6 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 WiFiClient client;
+#include <WiFiManager.h>
+WiFiManager wm; // global wm instance
 
 #include "set.h"
 #define indikator D4
@@ -23,18 +25,24 @@ uint8_t m_Counter = 0;   // Penghitung 8-bit untuk efek breathe
 void setup() {
   Serial.begin(115200);
   pinMode(indikator, OUTPUT);
-  WiFi.begin(ssid, password);
-  Serial.println("Menghubungkan WiFi...");
-  
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  bool res;
+    
+  res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
+
+  if(!res) {
+      Serial.println("Failed to connect");
+      connectt=false;
+  } 
+  else {
+    connectt=true;
+    Serial.println("\nWiFi Terhubung!");
+    Serial.println("Silakan input data:");
+    Serial.println("Format: label=PAKET_A panjang=30 lebar=20 tinggi=15 berat=5");
+    Serial.println("Ketik 'kirim' untuk mengirim data ke server.");
   }
-  connectt=true;
-  Serial.println("\nWiFi Terhubung!");
-  Serial.println("Silakan input data:");
-  Serial.println("Format: label=PAKET_A panjang=30 lebar=20 tinggi=15 berat=5");
-  Serial.println("Ketik 'kirim' untuk mengirim data ke server.");
+  
+  
+  
 }
 
 void loop() {
@@ -60,6 +68,9 @@ void loop() {
         Serial.println("Data belum lengkap! Isi data dulu.");
       }
     } 
+    else if(input.equalsIgnoreCase("wifi")) {
+      
+    }
     else {
       Serial.println("Format tidak dikenali. Ketik 'kirim' atau masukkan data.");
     }
