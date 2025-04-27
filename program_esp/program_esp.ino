@@ -30,15 +30,15 @@ void setup() {
   res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
 
   if(!res) {
-      Serial.println("Failed to connect");
+      //Serial.println("Failed to connect");
       connectt=false;
   } 
   else {
     connectt=true;
-    Serial.println("\nWiFi Terhubung!");
-    Serial.println("Silakan input data:");
-    Serial.println("Format: label=PAKET_A panjang=30 lebar=20 tinggi=15 berat=5");
-    Serial.println("Ketik 'kirim' untuk mengirim data ke server.");
+//    Serial.println("\nWiFi Terhubung!");
+//    Serial.println("Silakan input data:");
+//    Serial.println("Format: label=PAKET_A panjang=30 lebar=20 tinggi=15 berat=5");
+//    Serial.println("Ketik 'kirim' untuk mengirim data ke server.");
   }
   
   
@@ -58,21 +58,21 @@ void loop() {
       tinggi  = ambilData(input, "tinggi=");
       berat   = ambilData(input, "berat=");
       
-      Serial.println("Data berhasil disimpan sementara.");
-      Serial.println("Ketik 'kirim' untuk mengirim data.");
+//      Serial.println("Data berhasil disimpan sementara.");
+//      Serial.println("Ketik 'kirim' untuk mengirim data.");
     } 
     else if (input.equalsIgnoreCase("kirim")) {
       if (label != "" && panjang != "" && lebar != "" && tinggi != "" && berat != "") {
         kirimData();
       } else {
-        Serial.println("Data belum lengkap! Isi data dulu.");
+        //Serial.println("Data belum lengkap! Isi data dulu.");
       }
     } 
     else if(input.equalsIgnoreCase("wifi")) {
       
     }
     else {
-      Serial.println("Format tidak dikenali. Ketik 'kirim' atau masukkan data.");
+      //Serial.println("Format tidak dikenali. Ketik 'kirim' atau masukkan data.");
     }
     //Serial.println("adrres:" + addres);
   }
@@ -113,7 +113,7 @@ void kirimData() {
     // Reset data
     label = panjang = lebar = tinggi = berat = "";
   } else {
-    Serial.println("WiFi tidak terhubung.");
+    //Serial.println("WiFi tidak terhubung.");
   }
 }
 
