@@ -206,7 +206,7 @@ byte pointer[] = {
 void setup() {
   Serial.begin(115200); // Inisialisasi komunikasi serial
   scale.begin(); 
-  lcd.begin();
+  lcd.begin(20,4);
   lcd.backlight();
   pinMode(buzzer, OUTPUT);
   for(int i = 0; i < 3; i++){pinMode(led[i],OUTPUT);}
@@ -226,14 +226,14 @@ void setup() {
   scale.start(stabilizingtime, _tare);
   
   if (scale.getTareTimeoutFlag()|| scale.getSignalTimeoutFlag()) {
-    Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
+    //Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
     lcd.setCursor(0,1);
     lcd.print("ERROR in LOAD CELL!!");
     while (1);
   }
   else {
     scale.setCalFactor(calibration_factor); // set calibration value (float)
-    Serial.println("Startup is complete");
+    //Serial.println("Startup is complete");
     for(int i = 0; i < 100; i++){
       lcd.setCursor(0,0);
       lcd.print("LOADING..");
@@ -316,7 +316,7 @@ void showLed(){
 //-------------------PROGRAM BUTTON SINGLE CLICK------------------------//
 void singleClick(){
  
-  Serial.println("button 1 klik run");
+  //Serial.println("button 1 klik run");
   
   if(currentLayer == 0 && subLayer == 0 ){ 
     
@@ -332,10 +332,10 @@ void singleClick(){
     stateRun  = 0;
     coT=0;
     scale.tare();
-    Serial.println(String() + "trigger  :" + trigger);
-    Serial.println(String() + "runObject:" + runObject);
-    Serial.println(String() + "timeRead :" + timeRead);
-    Serial.println(String() + "stateRun :" + stateRun);
+//    Serial.println(String() + "trigger  :" + trigger);
+//    Serial.println(String() + "runObject:" + runObject);
+//    Serial.println(String() + "timeRead :" + timeRead);
+//    Serial.println(String() + "stateRun :" + stateRun);
   }
 
  if(currentLayer == 1 && subLayer == 0){ 
@@ -400,8 +400,8 @@ void singleClick(){
   scale.refreshDataSet();
   calibration_factor = scale.getNewCalibration(parWeight); //get the new calibration value
   EEPROM.put(0,calibration_factor);
-  Serial.println("calibration_factor1:" + String(calibration_factor));
-  Serial.println("parWeight:" + String(parWeight));
+//  Serial.println("calibration_factor1:" + String(calibration_factor));
+//  Serial.println("parWeight:" + String(parWeight));
   clearMenu();
  }
 
@@ -536,7 +536,7 @@ void singleClick(){
 
 //------------------------PROGRAM BUTTON DOUBLE CLICK--------------------------//
 void doubleclick1(){
-  Serial.println("button 2 klik run");
+  //Serial.println("button 2 klik run");
  if(currentLayer == 0){
     currentLayer = 1;
     currentSelect = 1;
@@ -840,7 +840,7 @@ void showSetting(){
         }
       }
       
-      Serial.println(String() + "conLevel:" + conLevel);
+      //Serial.println(String() + "conLevel:" + conLevel);
     }
 
     else if(conCal==2){
@@ -1032,19 +1032,19 @@ void kalkulasi(){
     conSen++;
     for(int i = 0; i < valueMax; i++){
       panjang = hc1.dist() + 1; 
-      Serial.println("conSen panjang:" + String(conSen));
+      //Serial.println("conSen panjang:" + String(conSen));
       delay(60);
     }
 
     for(int i = 0; i < valueMax; i++){
       lebar  = hc2.dist() + 1; 
-      Serial.println("conSen lebar   :" + String(conSen));
+      //Serial.println("conSen lebar   :" + String(conSen));
       delay(60);
     }
 
     for(int i = 0; i < valueMax; i++){
      tinggi  = hc3.dist() + 1; 
-      Serial.println("conSen tinggi  :" + String(conSen));
+      //Serial.println("conSen tinggi  :" + String(conSen));
       delay(60);
     }
     
