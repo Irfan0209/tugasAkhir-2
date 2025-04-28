@@ -1,0 +1,11 @@
+cara memasang dan mengakses database mySQL diserver XAMPP
+
+>copy folder php_ZAMPP ke direktori "C:\xampp\htdocs"
+>buka software XAMPP Control Panel dan nyalakan "Apache" dan "MySQL"
+>lalu buka CMD dan ketik "ipconfig" ,catat ip address di IPv4 Address
+>buka browser dan ketik ,contoh "192.168.100.153/php_XAMPP"(rubah ip address sesuai ip adrress laptop/komputer yang menjalankan server XAMPP
+>klik install.php ,untuk membuat database diXAMPP
+>klik view.php untuk melihat data dari database
+
+#untuk mengakses data yang masuk di database mysql,buka browser dan ketik "ipAddress/php_XAMPP/view.php" ,
+rubah ipAddress dengan ip addressmu

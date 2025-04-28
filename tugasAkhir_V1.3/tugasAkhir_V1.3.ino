@@ -1092,6 +1092,8 @@ void kalkulasi(){
       clearChar(18,0);
       clearChar(19,0);
       Serial.println("label=paket"+String(1) + "panjang="+String(hasilP) + "lebar="+String(hasilL) + "tinggi="+String(hasilT) + "berat="+String(weight));
+      delay(100);
+      Serial.println("kirim");
     }
   
   }
