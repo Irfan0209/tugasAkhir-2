@@ -205,8 +205,9 @@ byte pointer[] = {
  
 void setup() {
   Serial.begin(115200); // Inisialisasi komunikasi serial
+  Serial3.begin(115200);
   scale.begin(); 
-  lcd.begin(20,4);
+  lcd.init();
   lcd.backlight();
   pinMode(buzzer, OUTPUT);
   for(int i = 0; i < 3; i++){pinMode(led[i],OUTPUT);}
@@ -726,6 +727,7 @@ void updateProgressBar(unsigned long count, unsigned long totalCount, int lineTo
 
 //-----------------------TAMPILAN LCD--------------------//
 void showSetting(){
+
   int dataSensor[]={valueLength,valueWidth,valueHeight,0};
   if(currentLayer==0 && subLayer == 0){
 
@@ -1026,6 +1028,7 @@ void kalkulasi(){
   static int           co;
   static int           conSen=0;
   int                  valueMax = timerLock / 3;
+  static uint8_t conLabel=0;
  
   if(tmr - saveTmr1 > 50 && trigger == true){
     saveTmr1 = tmr;
@@ -1091,9 +1094,19 @@ void kalkulasi(){
       stateRun = 0;
       clearChar(18,0);
       clearChar(19,0);
-      Serial.println("label=paket"+String(1) + "panjang="+String(hasilP) + "lebar="+String(hasilL) + "tinggi="+String(hasilT) + "berat="+String(weight));
-      delay(100);
-      Serial.println("kirim");
+      Serial3.print("label=paket_"+String(conLabel));
+      Serial3.print(" ");
+      Serial3.print("panjang="+String(hasilP));
+      Serial3.print(" ");
+      Serial3.print("lebar="+String(hasilL));
+      Serial3.print(" ");
+      Serial3.print("tinggi="+String(hasilT));
+      Serial3.print(" ");
+      Serial3.println("berat="+String(weight));
+      Serial3.print(" ");
+      delay(10);
+      Serial3.println("kirim");
+      conLabel++;
     }
   
   }
