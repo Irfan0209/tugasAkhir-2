@@ -6,8 +6,8 @@ WiFiManager wm; // global wm instance
 
 #include "set.h"
 #define indikator D4
-const char* ssid = SSID_WIFI;         
-const char* password = PASSWORD_WIFI;  
+//const char* ssid = SSID_WIFI;         
+//const char* password = PASSWORD_WIFI;  
 
 String addres = ADDRES_SERVER;
 
@@ -22,28 +22,87 @@ bool connectt=false;
 #define DIMM(x) ((uint32_t)(x) * (BOARD_LED_BRIGHTNESS) / 255)
 uint8_t m_Counter = 0;   // Penghitung 8-bit untuk efek breathe
 
+#include <EEPROM.h>
+
+#define EEPROM_SIZE 96          // Pastikan cukup untuk menyimpan IP, GW, Subnet
+
+// Custom parameter input untuk portal konfigurasi
+WiFiManagerParameter custom_ip("ip", "Static IP", "", 16);
+
+IPAddress staticIP;
+
+// Fungsi untuk menyimpan IP ke EEPROM
+void saveIPtoEEPROM(IPAddress ip) {
+  EEPROM.begin(EEPROM_SIZE);
+  for (int i = 0; i < 4; i++) {
+    EEPROM.write(i, ip[i]);
+  }
+  EEPROM.commit();
+  EEPROM.end();
+//  Serial.println("IP address saved to EEPROM.");
+}
+
+// Fungsi untuk membaca IP dari EEPROM
+bool readIPfromEEPROM(IPAddress &ip) {
+  EEPROM.begin(EEPROM_SIZE);
+  for (int i = 0; i < 4; i++) {
+    ip[i] = EEPROM.read(i);
+  }
+  EEPROM.end();
+
+  // Validasi sederhana: IP tidak boleh 0.0.0.0
+  if (ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0) {
+    return false;
+  }
+  return true;
+}
+
+void configModeCallback(WiFiManager *myWiFiManager) {
+//  /Serial.println("Portal konfigurasi terbuka!");
+  digitalWrite(indikator, LOW); // Nyalakan LED
+}
+
 void setup() {
   Serial.begin(115200);
   pinMode(indikator, OUTPUT);
-  bool res;
-    
-  res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
+  delay(1000);
 
-  if(!res) {
-      //Serial.println("Failed to connect");
-      connectt=false;
-  } 
-  else {
-    connectt=true;
-//    Serial.println("\nWiFi Terhubung!");
-//    Serial.println("Silakan input data:");
-//    Serial.println("Format: label=PAKET_A panjang=30 lebar=20 tinggi=15 berat=5");
-//    Serial.println("Ketik 'kirim' untuk mengirim data ke server.");
+  IPAddress ip;
+  if (readIPfromEEPROM(ip)) {
+//    Serial.println("Static IP loaded from EEPROM:");
+//    Serial.print("IP: "); Serial.println(ip);
+    addres = ip.toString();
+//    Serial.print("addres: "); Serial.println(addres);
   }
+
+//  WiFiManager wm;
+  // Callback saat portal terbuka
+  wm.setAPCallback(configModeCallback);
   
-  
-  
+  // Tambah parameter input ke portal
+  wm.addParameter(&custom_ip);
+
+  // Coba connect, jika gagal, buka portal
+  if (!wm.autoConnect("AP_timbangan")) {
+//    Serial.println("Failed to connect.");
+    delay(2000);
+    ESP.restart();
+  }
+  connectt=1;
+  // Setelah connect, cek apakah ada input baru
+  String ipStr = custom_ip.getValue();
+  if (ipStr.length() > 0) {
+    IPAddress newIP;
+    newIP.fromString(ipStr);
+    saveIPtoEEPROM(newIP);
+//    Serial.println("New static IP saved. Restarting...");
+    delay(2000);
+    ESP.restart(); // Restart untuk menggunakan IP statis baru
+  }
+
+
 }
+
 
 void loop() {
   if (Serial.available()) {
